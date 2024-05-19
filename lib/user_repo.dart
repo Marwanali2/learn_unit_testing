@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 
 class UserRepository {
   final Dio dio;
-  //static late dynamic response;
   UserRepository(this.dio);
   Future<UserModel> getUser() async {
     var response =
