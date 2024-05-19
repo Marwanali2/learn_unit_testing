@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:learn_unit_testing/counter.dart';
+import 'package:learn_unit_testing/user_model.dart';
+import 'package:learn_unit_testing/user_repository.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,14 +33,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final CounterClass counterClassObject = CounterClass();
-
-  void _incrementCounter() {
-    setState(() {
-      counterClassObject.incrementCounter();
-    });
-  }
-
+  Future<UserModel> getUsers = UserRepository(Dio()).getUser();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,24 +41,22 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center( 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text( 
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              counterClassObject.count.toString(),
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: FutureBuilder(
+        future: getUsers,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return Center(
+              child: Text(
+                'id: ${snapshot.data!.id},\n name: ${snapshot.data!.name}, \n email: ${snapshot.data!.email}',
+                style: const TextStyle(fontSize: 30),
+              ),
+            );
+          }
+        },
       ),
     );
   }
